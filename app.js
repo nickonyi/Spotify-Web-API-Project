@@ -78,4 +78,68 @@ const APIContoroller = (function() {
     }
 }());
 
-APIContoroller.getGenres();
+//UI module
+const UIcontroller = (function() {
+    //object to hold references to html selectors
+
+    const domeElements = {
+        selectGenre: '#select_genre',
+        selectPlaylist: '#select_playlist',
+        buttonSubmit: '#btn_submit',
+        divSongDetail: '#song-detail',
+        hfToken: '#hidden_token',
+        divSongList: '.song-list'
+    }
+
+    //public methods
+    return {
+        inputFields() {
+            return {
+                genre: document.querySelector(selectGenre),
+                playlist: document.querySelector(selectPlaylist),
+                tracks: document.querySelector(divSongList),
+                submit: document.querySelector(buttonSubmit),
+                songDetail: document.querySelector(divSongDetail),
+            }
+        },
+
+        //methods to create select list option
+        createGenre(text, value) {
+            const html = `<option value=${value}>${text}</option>`;
+            document.querySelector(domeElements.selectGenre).insertAdjacentHTML('beforeend', html);
+        },
+        createPlaylist(text, value) {
+            const html = `<option value=${value}>${text}</option>`;
+            document.querySelector(domeElements.selectPlaylist).insertAdjacentHTML('beforeend', html);
+        },
+        createTrack(id, name) {
+            const html = `<a href="#" class="list-group-item list-group-item-action list-group-item-light" id="${id}">${name}</a>`;
+            document.querySelector(domeElements.divSongList).insertAdjacentHTML('beforeend', html);
+        },
+        createTrackDetail(img, title, artist) {
+            const detailDiv = document.querySelector(domeElements.divSongDetail);
+
+            detailDiv.innerHTML = '';
+
+            const html =
+                `
+          <div class="row col-sm-12 px-0">
+              <img src="${img}" alt="">        
+          </div>
+          <div class="row col-sm-12 px-0">
+              <label for="Genre" class="form-label col-sm-12">${title}:</label>
+          </div>
+          <div class="row col-sm-12 px-0">
+              <label for="artist" class="form-label col-sm-12">By ${artist}:</label>
+          </div> 
+          `;
+
+            detailDiv.insertAdjacentHTML('beforeend', html)
+        }
+    }
+}())
+
+UIcontroller.createGenre('post-malone', 'big-boy');
+UIcontroller.createPlaylist('post-malone', 'big-boy');
+UIcontroller.createTrack(1, 'maluva');
+UIcontroller.createTrackDetail('https://static.toiimg.com/thumb/msid-107425764,imgsize-26290,width-400,resizemode-4/107425764.jpg', 'leave before you leave me', 'jonas brothers')

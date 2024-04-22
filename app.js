@@ -30,20 +30,20 @@ const APIContoroller = (function() {
 
     const _getPlaylistByGenre = async(token, genreId) => {
         const limit = 10;
-        const result = await fetch(`https://api.spotify.com/v1/browse/categories/${genreId}/playlist?limit=${limit}`, {
+        const result = await fetch(`https://api.spotify.com/v1/browse/categories/${genreId}/playlists?limit=${limit}`, {
             method: 'GET',
-            headers: { 'Authorization': 'Bearer' + token }
+            headers: { 'Authorization': 'Bearer ' + token }
         })
 
         const data = await result.json();
-        return data.playlist.items;
+        return data.playlists.items;
     }
 
     const _getTracks = async(token, trackEndpoint) => {
         const limit = 10;
         const result = await fetch(`${trackEndpoint}?limit=${limit}`, {
             method: 'GET',
-            headers: { 'Authorization': 'Bearer' + token }
+            headers: { 'Authorization': 'Bearer ' + token }
         });
 
         const data = await result.json();
@@ -53,7 +53,7 @@ const APIContoroller = (function() {
     const _getTrack = async(token, trackEndpoint) => {
         const result = await fetch(`${trackEndpoint}`, {
             method: 'GET',
-            headers: { 'Authorization': 'Bearer' + token }
+            headers: { 'Authorization': 'Bearer ' + token }
         });
 
         const data = await result.json();
@@ -73,7 +73,7 @@ const APIContoroller = (function() {
         getTracks(token, trackEndpoint) {
             return _getTracks(token, trackEndpoint);
         },
-        getTrack() {
+        getTrack(token, trackEndpoint) {
             return _getTrack(token, trackEndpoint);
         }
 
@@ -173,6 +173,55 @@ const APPController = (function(UICtrl, APICtrl) {
         //populate our genres select element
         genres.forEach((genre) => UICtrl.createGenre(genre.name, genre.id));
     }
+
+    //create genre change event listener
+    DOMInputs.genre.addEventListener('change', async() => {
+        //reset the playlist
+        UICtrl.resetPlaylist();
+        //get the token that is stored on the page
+        const token = UICtrl.getStoredToken().token;
+
+        //get the genre select field
+        const genreSelect = UICtrl.inputFields().genre;
+        //get the genre id assocated with the selected field
+        const genreId = genreSelect.options[genreSelect.selectedIndex].value;
+
+        //get the playlist based on the genre
+        const playlist = await APICtrl.getPlaylistByGenre(token, genreId);
+        //create a playlist list item for every playlist returned
+        playlist.forEach(song => UICtrl.createPlaylist(song.name, song.tracks.href));
+
+    })
+
+    //create submit button click event listener
+    DOMInputs.submit.addEventListener('click', async(e) => {
+        // prevent page reset
+        e.preventDefault();
+        // clear tracks
+        UICtrl.resetTracks();
+        //get the token
+        const token = UICtrl.getStoredToken().token;
+        // get the playlist field
+        const playlistSelect = DOMInputs.playlist;
+        // get track endpoint based on the selected playlist
+        const tracksEndPoints = playlistSelect.options[playlistSelect.selectedIndex].value;
+        //get the list of tracks
+        const tracks = await APICtrl.getTracks(token, tracksEndPoints);
+        // create a track list item
+        tracks.forEach(t => UICtrl.createTrack(t.track.href, t.track.name));
+    })
+
+    //create song selection click event listener
+    DOMInputs.tracks.addEventListener("click", async(e) => {
+        e.preventDefault();
+        UICtrl.resetTracks();
+        const token = UICtrl.getStoredToken().token;
+        const trackEndpoint = e.target.id;
+        //get the track object
+        const track = await APICtrl.getTrack(token, trackEndpoint);
+        //load the track details
+        UICtrl.createTrackDetail(track.album.images[2].url, track.name, track.artists[0].name)
+    })
 
 
 

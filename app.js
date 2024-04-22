@@ -1,14 +1,14 @@
 const APIContoroller = (function() {
-    const clientId = "";
-    const clientSecret = "";
+    const clientId = "ab82b5b07ecb4e308a4ecc406c86b303";
+    const clientSecret = "063e94452c624c5dbe4d2b464016b0e1";
 
     //private methods
     const _getToken = async() => {
         const result = await fetch('https://accounts.spotify.com/api/token', {
             method: 'POST',
             headers: {
-                'content-type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic' + btoa(clientId + ':' + clientSecret)
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': 'Basic ' + btoa(clientId + ':' + clientSecret)
             },
             body: 'grant_type=client_credentials'
         })
@@ -16,14 +16,16 @@ const APIContoroller = (function() {
         return data.access_token;
     }
 
+
     const _getGenres = async(token) => {
-        const result = await fetch('https://api.spotify.com/v1/browse/categories?locale=sv_US', {
+
+        const result = await fetch(`https://api.spotify.com/v1/browse/categories?locale=en_US`, {
             method: 'GET',
-            headers: { 'Authorization': 'Bearer' + token }
-        })
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
 
         const data = await result.json();
-        return data.categories.items
+        return data.categories.items;
     }
 
     const _getPlaylistByGenre = async(token, genreId) => {
@@ -95,11 +97,11 @@ const UIcontroller = (function() {
     return {
         inputFields() {
             return {
-                genre: document.querySelector(selectGenre),
-                playlist: document.querySelector(selectPlaylist),
-                tracks: document.querySelector(divSongList),
-                submit: document.querySelector(buttonSubmit),
-                songDetail: document.querySelector(divSongDetail),
+                genre: document.querySelector(domeElements.selectGenre),
+                playlist: document.querySelector(domeElements.selectPlaylist),
+                tracks: document.querySelector(domeElements.divSongList),
+                submit: document.querySelector(domeElements.buttonSubmit),
+                songDetail: document.querySelector(domeElements.divSongDetail),
             }
         },
 
@@ -135,11 +137,41 @@ const UIcontroller = (function() {
           `;
 
             detailDiv.insertAdjacentHTML('beforeend', html)
+        },
+        resetTrackDetail() {
+            this.inputFields().songDetail.innerHTML = "";
+        },
+        resetTracks() {
+            this.inputFields().tracks.innerHTML = "";
+            this.resetTrackDetail();
+        },
+        resetPlaylist() {
+            this.inputFields().playlist.innerHTML = "";
+            this.resetTracks();
+        },
+        storeToken(value) {
+            document.querySelector(domeElements.hfToken).value = value;
+        },
+        getStoredToken() {
+            return {
+                token: document.querySelector(domeElements.hfToken).value
+            }
         }
     }
 }())
 
+const APPController = (function(UICtrl, APICtrl) {
+    const DOMInputs = UICtrl.inputFields();
+
+    //get genres on page load
+    const loadGenres = async() => {
+        const token = "";
+    }
+}(UIcontroller, APIContoroller));
+
 UIcontroller.createGenre('post-malone', 'big-boy');
 UIcontroller.createPlaylist('post-malone', 'big-boy');
 UIcontroller.createTrack(1, 'maluva');
-UIcontroller.createTrackDetail('https://static.toiimg.com/thumb/msid-107425764,imgsize-26290,width-400,resizemode-4/107425764.jpg', 'leave before you leave me', 'jonas brothers')
+const token = APIContoroller.getToken();
+console.log(token);
+//console.log(APIContoroller.getGenres(token));

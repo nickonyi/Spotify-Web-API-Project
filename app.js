@@ -165,13 +165,24 @@ const APPController = (function(UICtrl, APICtrl) {
 
     //get genres on page load
     const loadGenres = async() => {
-        const token = "";
+        const token = await APIContoroller.getToken();
+        //store the token onto the page
+        UICtrl.storeToken(token);
+        //get the genres
+        const genres = await APICtrl.getGenres(token);
+        //populate our genres select element
+        genres.forEach((genre) => UICtrl.createGenre(genre.name, genre.id));
+    }
+
+
+
+    return {
+        init() {
+            console.log('App is starting!');
+            loadGenres();
+        }
     }
 }(UIcontroller, APIContoroller));
 
-UIcontroller.createGenre('post-malone', 'big-boy');
-UIcontroller.createPlaylist('post-malone', 'big-boy');
-UIcontroller.createTrack(1, 'maluva');
-const token = APIContoroller.getToken();
-console.log(token);
+APPController.init();
 //console.log(APIContoroller.getGenres(token));
